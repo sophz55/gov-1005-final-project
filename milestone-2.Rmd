@@ -1,0 +1,22 @@
+---
+title: "Milestone 2"
+author: "Sophia Zheng"
+date: "9/19/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### Dasha Metropolitansky et. al.: First-Year Blocking Group Project
+Pros: This project is very relevant to the lives of Harvard students, and is well put together. The group responsible for this project clearly partook in a large amount of data gathering and cleaning, mentioning that they not only surveyed a significant number of first years, but additionally scraped the Harvard College Facebook, varsity athletic team rosters, and a list of international students.
+
+Cons: Because the data was collected by the project group members as an elective survey, I would be concerned that the data collected might have been skewed in that the individuals themselves elected to participate, therefore introducing some potential bias in that they might've been friends (and possibly blockmates) with others who participated, for example.
+
+
+### Chris Onesti: Course Enrollment Analysis
+
+Pros: This project is, like the previous, also very relevant to the lives of Harvard students, and produces interesting recults. The graphs are very neat, and give a nice breakdown of the sizes of classes across departments, taking a look at many metrics of the course offerings at Harvard.
+
+Cons: Although the data was probably the limiting factor here, it would have been very interesting to see if we could track the course enrollment patterns at a more specific level. For example, breaking down students enrolled in each course by concentration, secondary, etc. to see which departments tend to have more cross-concentration interest.
