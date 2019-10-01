@@ -1,0 +1,11 @@
+---
+title: "Milestone 3"
+author: "Sophia Zheng"
+date: "10/1/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
