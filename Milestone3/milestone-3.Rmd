@@ -9,3 +9,17 @@ output: html_document
 knitr::opts_chunk$set(echo = FALSE)
 ```
 
+## House Prices in Major Cities and Data Science
+
+### Overview of Data
+
+Zillow: comparing NYC, SF, Seattle
+Specialized High Schools in NYC: funding, demographics, student stats
+Q-guide: breaking down class enrollments by concentrators/non-concentrators and studying variance in workload and enjoyment of class.
+
+The data set that I'm interested in is from the online real estate database company, Zillow. It can be found [at this link](https://www.zillow.com/research/data/). The data available on the Zillow website provides the Zillow Home Value Index (ZHVI), which is "a smoothed, seasonally adjusted measure of the median estimated home value across a given region and housing type", as well as useful metrics like median sale price, list price, and days on Zillow, for example. It contains full sets of data from 1996 to 2017, as well as data from as recent as August of 2019. It can be parsed by region, including zip code, neighborhood, city, and state. 
+
+### What I Plan to Do
+  The data provided by Zillow is already clean and in csv files, albeit separated out into a few different files. Going forward, I plan to combine together csv files, such as for example the ZHVI, sale price, and list price csv files. The data I have included includes the ZHVI and Sale Prices for all metro regions, as well as ZHVI by zip code, over time.
+  
+  What I am particularly curious about with this data is the trends in home value, sale price, and rent price, over the course of the past twenty years, but especially with respect to the major cities in the US. In particular, I am interested in looking at trends in New York City, San Francisco, and Seattle. I have interest in these three cities in that New York City has historically, and continues to be well known for its high housing prices, and San Francisco's housing prices have similarly been high, especially with the growth of the technology industry in the Bay Area. As a senior who will likely live in Seattle for the next few years, I am interested in looking at the housing price trends for Seattle, which I hypothesize will see increasing housing prices over the next few years as tech companies establish and develop more of the city. I would like to see if any metrics are useful for predicting trends of this sort, and whether there have been commonalities across these cities.
