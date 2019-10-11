@@ -1,0 +1,51 @@
+---
+title: "Milestone 4"
+author: "Sophia Zheng"
+date: "10/11/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(janitor)
+library(tidyverse)
+zhvi_data <- read_csv("../raw-data/Metro_Zhvi_AllHomes.csv")
+sell_price_data <- read_csv("../raw-data/Sale_Prices_Msa.csv")
+```
+
+### Plotting Zillow Home Value Index Data
+```{r}
+zhvi_data <- zhvi_data %>% 
+  # tidying data by pulling the ZHVIs into new rows by date
+  gather(date, zhvi, "1996-04":"2019-08") %>% 
+  # cleaning names, e.g. RegionName -> region_name
+  clean_names() %>% 
+  # converting date chars to date
+  mutate(date, date = as.Date(date, format = "%Y-%M")) %>% 
+  # filtering for my target cities
+  filter(region_name %in% c("New York, NY", "Seattle, WA", "San Francisco, CA"))
+
+ggplot(zhvi_data, aes(x = date, y = zhvi, color = region_name, group = region_name)) +
+  geom_smooth(method = 'loess', formula = 'y ~ x') + 
+  labs(title = "Zillow Home Value Index in New York, Seattle, and San Francisco since 1996",
+       subtitle = "Comparing the median estimated home value across regions",
+       x = "Date",
+       y = "Zillow Home Value Index")
+```
+
+### Plotting Sale Price Data
+```{r}
+sell_price_data <- sell_price_data %>% 
+  gather(date, sale_price, "2008-03":"2019-08") %>% 
+  clean_names() %>% 
+  mutate(date, date = as.Date(date, format = "%Y-%M")) %>% 
+  filter(region_name %in% c("New York, NY", "Seattle, WA", "San Francisco, CA"))
+
+ggplot(sell_price_data, aes(x = date, y = sale_price, color = region_name, group = region_name)) +
+  geom_smooth(method = 'loess', formula = 'y ~ x') + 
+  labs(title = "Median Sale Prices in New York, Seattle, and San Francisco since 2008",
+       subtitle = "Comparing the median monthly sale prices across regions",
+       x = "Date",
+       y = "Sale Price")
+```
+
