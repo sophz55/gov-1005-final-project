@@ -1,0 +1,70 @@
+---
+title: "Milestone 6"
+author: "Sophia Zheng"
+date: "11/27/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(fs)
+library(janitor)
+library(tidyverse)
+```
+
+```{r cache = TRUE}
+# get data
+dir_create("raw-data")
+download.file(url = "http://files.zillowstatic.com/research/public/Zip/Zip_Zhvi_AllHomes.csv",
+              destfile = "raw-data/zhvi.csv")
+download.file(url = "http://files.zillowstatic.com/research/public/Zip/Sale_Prices_Zip.csv",
+              destfile = "raw-data/sale_prices.csv")
+download.file(url = "http://files.zillowstatic.com/research/public/Zip/Zip_Zri_AllHomesPlusMultifamily.csv",
+              destfile = "raw-data/zri.csv")
+download.file(url = "http://files.zillowstatic.com/research/public/Zip/Zip_MedianRentalPrice_AllHomes.csv",
+              destfile = "raw-data/rental_prices.csv")
+download.file(url = "http://files.zillowstatic.com/research/public/Affordability_Income_2018Q4.csv",
+              destfile = "raw-data/income.csv")
+
+zhvi <- read_csv("raw-data/zhvi.csv",
+                 col_types = cols(
+                              .default = col_double(),
+                              RegionName = col_character(),
+                              City = col_character(),
+                              State = col_character(),
+                              Metro = col_character(),
+                              CountyName = col_character()
+                            ))
+sale_prices <- read_csv("raw-data/sale_prices.csv",
+                        col_types = cols(
+                                      .default = col_double(),
+                                      RegionName = col_character(),
+                                      StateName = col_character()
+                                    ))
+zri <- read_csv("raw-data/zri.csv",
+                col_types = cols(
+                              .default = col_double(),
+                              RegionName = col_character(),
+                              City = col_character(),
+                              State = col_character(),
+                              Metro = col_character(),
+                              CountyName = col_character()
+                            ))
+rental_prices <- read_csv("raw-data/rental_prices.csv",
+                          col_types = cols(
+                                        .default = col_double(),
+                                        RegionName = col_character(),
+                                        City = col_character(),
+                                        State = col_character(),
+                                        Metro = col_character(),
+                                        CountyName = col_character()
+                                      ))
+income <- read_csv("raw-data/income.csv",
+                   col_types = cols(
+                                .default = col_double(),
+                                RegionName = col_character()
+                              ))
+
+dir_delete("raw-data")
+```
+

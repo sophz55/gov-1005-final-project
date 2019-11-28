@@ -1,0 +1,15 @@
+---
+title: "Milestone 5"
+author: "Sophia Zheng"
+date: "11/27/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(fs)
+library(janitor)
+library(tidyverse)
+```
+
+## About
