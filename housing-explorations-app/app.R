@@ -1,6 +1,8 @@
 library(shiny)
 library(markdown)
 
+all_housing_data <- read_csv("all_housing_data.csv")
+
 # Define UI for application that draws a histogram
 ui <- navbarPage(
   "Housing Explorations in US Areas of Interest",

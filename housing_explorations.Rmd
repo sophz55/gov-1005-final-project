@@ -89,19 +89,6 @@ clean <- function(df, values_to) {
   return (x)
 }
 
-# find_means <- function(df) {
-#   return(df %>%
-#            filter(
-#              metro %in% c(
-#                "New York-Newark-Jersey City",
-#                "San Francisco-Oakland-Hayward",
-#                "Seattle-Tacoma-Bellevue"
-#              )
-#            ) %>%
-#            group_by(metro, date) %>%
-#            summarize(mean_value = mean(value)))
-# }
-
 clean_zhvi <- clean(zhvi, "zhvi") %>% 
   filter(metro %in% c("New York-Newark-Jersey City", 
                       "San Francisco-Oakland-Hayward", 
@@ -147,4 +134,8 @@ median_income <- median_income %>%
   clean_names()
 ```
 
+```{r}
+all_housing_data %>% write_csv(path = "housing-explorations-app/all_housing_data.csv")
+median_income %>% write_csv(path = "housing-explorations-app/median_income.csv")
+```
 
