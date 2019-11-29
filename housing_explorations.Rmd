@@ -8,6 +8,7 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
 library(fs)
+library(zoo)
 library(janitor)
 library(tidyverse)
 ```
@@ -24,7 +25,7 @@ download.file(url = "http://files.zillowstatic.com/research/public/Zip/Zip_Zri_A
 download.file(url = "http://files.zillowstatic.com/research/public/Zip/Zip_MedianRentalPrice_AllHomes.csv",
               destfile = "raw-data/rental_prices.csv")
 download.file(url = "http://files.zillowstatic.com/research/public/Affordability_Income_2018Q4.csv",
-              destfile = "raw-data/income.csv")
+              destfile = "raw-data/median_income.csv")
 
 zhvi <- read_csv("raw-data/zhvi.csv",
                  col_types = cols(
@@ -35,12 +36,15 @@ zhvi <- read_csv("raw-data/zhvi.csv",
                               Metro = col_character(),
                               CountyName = col_character()
                             ))
+
 sale_prices <- read_csv("raw-data/sale_prices.csv",
                         col_types = cols(
                                       .default = col_double(),
                                       RegionName = col_character(),
                                       StateName = col_character()
-                                    ))
+                                    )) %>% 
+  select(- StateName)
+
 zri <- read_csv("raw-data/zri.csv",
                 col_types = cols(
                               .default = col_double(),
@@ -50,6 +54,7 @@ zri <- read_csv("raw-data/zri.csv",
                               Metro = col_character(),
                               CountyName = col_character()
                             ))
+
 rental_prices <- read_csv("raw-data/rental_prices.csv",
                           col_types = cols(
                                         .default = col_double(),
@@ -59,7 +64,8 @@ rental_prices <- read_csv("raw-data/rental_prices.csv",
                                         Metro = col_character(),
                                         CountyName = col_character()
                                       ))
-income <- read_csv("raw-data/income.csv",
+
+median_income <- read_csv("raw-data/median_income.csv",
                    col_types = cols(
                                 .default = col_double(),
                                 RegionName = col_character()
@@ -67,4 +73,63 @@ income <- read_csv("raw-data/income.csv",
 
 dir_delete("raw-data")
 ```
+
+```{r cache = TRUE}
+clean <- function(df) {
+  x <- df %>%
+    pivot_longer(cols = contains("-"),
+                 names_to = "date") %>%
+    drop_na %>%
+    clean_names() %>%
+    rename(zip_code = region_name) %>%
+    select(-size_rank)
+  
+  x$date <- as.Date(as.yearmon(x$date))
+  return (x)
+}
+
+find_means <- function(df) {
+  return(df %>%
+           filter(
+             metro %in% c(
+               "New York-Newark-Jersey City",
+               "San Francisco-Oakland-Hayward",
+               "Seattle-Tacoma-Bellevue"
+             )
+           ) %>%
+           group_by(metro, date) %>%
+           summarize(mean_value = mean(value)))
+}
+
+zhvi <- clean(zhvi) %>% find_means()
+  
+sale_prices <- clean(sale_prices) %>% 
+  left_join(zhvi %>% select (-value), sale_prices, by = c("region_id", "zip_code", "date")) %>% 
+  find_means()
+
+zri <- clean(zri) %>% find_means()
+
+rental_prices <- clean(rental_prices) %>% find_means()
+
+# all_housing_data <- left_join(zhvi, sale_prices, by = c("region_id", "zip_code", "date")) %>% 
+#   full_join(zri, by = c("region_id", "zip_code", "city", "state", "metro", "county_name", "date")) %>% 
+#   full_join(rental_prices, by = c("zip_code", "city", "state", "metro", "county_name", "date")) 
+# 
+# all_housing_data$date <- as.Date(as.yearmon(all_housing_data$date))
+# all_housing_data <- all_housing_data %>% 
+#   group_by(metro, date) %>% 
+#   summarize(mean_zhvi = mean(zhvi),
+#             mean_sale_price = mean(sale_price),
+#             mean_zri = mean(zri),
+#             mean_rental_price = mean(rental_price))
+
+median_income <- median_income %>% 
+  pivot_longer(cols = contains("-"),
+               names_to = "date",
+               values_to = "median_income") %>% 
+  filter(str_detect(RegionName, "New York|San Francisco|Seattle")) %>% 
+  separate(RegionName, into = c("city", "state"), sep = ", ") %>% 
+  clean_names()
+```
+
 
