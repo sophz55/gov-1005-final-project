@@ -75,10 +75,11 @@ dir_delete("raw-data")
 ```
 
 ```{r cache = TRUE}
-clean <- function(df) {
+clean <- function(df, values_to) {
   x <- df %>%
     pivot_longer(cols = contains("-"),
-                 names_to = "date") %>%
+                 names_to = "date",
+                 values_to = values_to) %>%
     drop_na %>%
     clean_names() %>%
     rename(zip_code = region_name) %>%
@@ -88,47 +89,61 @@ clean <- function(df) {
   return (x)
 }
 
-find_means <- function(df) {
-  return(df %>%
-           filter(
-             metro %in% c(
-               "New York-Newark-Jersey City",
-               "San Francisco-Oakland-Hayward",
-               "Seattle-Tacoma-Bellevue"
-             )
-           ) %>%
-           group_by(metro, date) %>%
-           summarize(mean_value = mean(value)))
-}
+# find_means <- function(df) {
+#   return(df %>%
+#            filter(
+#              metro %in% c(
+#                "New York-Newark-Jersey City",
+#                "San Francisco-Oakland-Hayward",
+#                "Seattle-Tacoma-Bellevue"
+#              )
+#            ) %>%
+#            group_by(metro, date) %>%
+#            summarize(mean_value = mean(value)))
+# }
 
-zhvi <- clean(zhvi) %>% find_means()
-  
-sale_prices <- clean(sale_prices) %>% 
-  left_join(zhvi %>% select (-value), sale_prices, by = c("region_id", "zip_code", "date")) %>% 
-  find_means()
+clean_zhvi <- clean(zhvi, "zhvi") %>% 
+  filter(metro %in% c("New York-Newark-Jersey City", 
+                      "San Francisco-Oakland-Hayward", 
+                      "Seattle-Tacoma-Bellevue"))
 
-zri <- clean(zri) %>% find_means()
+clean_sale_prices <- clean(sale_prices, "sale_price")
 
-rental_prices <- clean(rental_prices) %>% find_means()
+clean_zri <- clean(zri, "zri") %>% 
+  filter(metro %in% c("New York-Newark-Jersey City",
+                      "San Francisco-Oakland-Hayward",
+                      "Seattle-Tacoma-Bellevue"))
 
-# all_housing_data <- left_join(zhvi, sale_prices, by = c("region_id", "zip_code", "date")) %>% 
-#   full_join(zri, by = c("region_id", "zip_code", "city", "state", "metro", "county_name", "date")) %>% 
-#   full_join(rental_prices, by = c("zip_code", "city", "state", "metro", "county_name", "date")) 
-# 
-# all_housing_data$date <- as.Date(as.yearmon(all_housing_data$date))
-# all_housing_data <- all_housing_data %>% 
-#   group_by(metro, date) %>% 
-#   summarize(mean_zhvi = mean(zhvi),
-#             mean_sale_price = mean(sale_price),
-#             mean_zri = mean(zri),
-#             mean_rental_price = mean(rental_price))
+clean_rental_prices <- clean(rental_prices, "rental_price") %>% 
+  filter(metro %in% c("New York-Newark-Jersey City",
+                      "San Francisco-Oakland-Hayward",
+                      "Seattle-Tacoma-Bellevue"))
 
-median_income <- median_income %>% 
+all_housing_data <-
+  left_join(clean_zhvi, clean_sale_prices, by = c("region_id", "zip_code", "date")) %>% 
+  full_join(clean_zri,
+            by = c("region_id", "zip_code", "city", "state", "metro", "county_name", "date")) %>%
+  full_join(clean_rental_prices,
+            by = c("zip_code", "city", "state", "metro", "county_name", "date"))
+
+all_housing_data <- all_housing_data %>%
+  group_by(metro, date) %>%
+  summarize(
+    mean_zhvi = mean(zhvi),
+    mean_sale_price = mean(sale_price, na.rm = TRUE),
+    mean_zri = mean(zri, na.rm = TRUE),
+    mean_rental_price = mean(rental_price, na.rm = TRUE)
+  ) %>% 
+  pivot_longer(cols = c(mean_zhvi, mean_sale_price, mean_zri, mean_rental_price),
+               names_to = "value_type",
+               values_to = "mean_value")
+
+median_income <- median_income %>%
   pivot_longer(cols = contains("-"),
                names_to = "date",
-               values_to = "median_income") %>% 
-  filter(str_detect(RegionName, "New York|San Francisco|Seattle")) %>% 
-  separate(RegionName, into = c("city", "state"), sep = ", ") %>% 
+               values_to = "median_income") %>%
+  filter(str_detect(RegionName, "New York|San Francisco|Seattle")) %>%
+  separate(RegionName, into = c("city", "state"), sep = ", ") %>%
   clean_names()
 ```
 
