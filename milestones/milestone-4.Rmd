@@ -8,10 +8,36 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
 library(janitor)
+library(fs)
 library(tidyverse)
-zhvi_data <- read_csv("../raw-data/Metro_Zhvi_AllHomes.csv")
-sell_price_data <- read_csv("../raw-data/Sale_Prices_Msa.csv")
 ```
+
+```{r cache = TRUE}
+dir_create("raw-data")
+download.file(url = "http://files.zillowstatic.com/research/public/Metro/Metro_Zhvi_AllHomes.csv",
+              destfile = "raw-data/zhvi.csv")
+download.file(url = "http://files.zillowstatic.com/research/public/Metro/Sale_Prices_Msa.csv",
+              destfile = "raw-data/sale_prices.csv")
+
+zhvi_data <- read_csv("raw-data/zhvi.csv",
+                 col_types = cols(
+                              .default = col_double(),
+                              RegionName = col_character(),
+                              City = col_character(),
+                              State = col_character(),
+                              Metro = col_character(),
+                              CountyName = col_character()
+                            ))
+sell_price_data <- read_csv("raw-data/sale_prices.csv",
+                        col_types = cols(
+                                      .default = col_double(),
+                                      RegionName = col_character(),
+                                      StateName = col_character()
+                                    ))
+
+dir_delete("raw-data")
+```
+
 
 ### Plotting Zillow Home Value Index Data
 ```{r}

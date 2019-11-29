@@ -1,5 +1,5 @@
 ---
-title: "Milestone 6"
+title: "Housing Explorations"
 author: "Sophia Zheng"
 date: "11/27/2019"
 output: html_document
