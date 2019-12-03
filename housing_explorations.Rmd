@@ -10,6 +10,7 @@ knitr::opts_chunk$set(echo = FALSE)
 library(fs)
 library(zoo)
 library(janitor)
+library(gganimate)
 library(tidyverse)
 ```
 
@@ -85,6 +86,7 @@ clean <- function(df, values_to) {
     select(-size_rank)
   
   x$date <- as.Date(as.yearmon(x$date))
+  
   return (x)
 }
 
@@ -105,6 +107,22 @@ clean_rental_prices <- clean(rental_prices, "rental_price") %>%
                       "San Francisco-Oakland-Hayward",
                       "Seattle-Tacoma-Bellevue"))
 
+clean_median_income <- median_income %>%
+  pivot_longer(cols = contains("-"),
+               names_to = "date",
+               values_to = "median_income") %>%
+  filter(str_detect(RegionName, "New York|San Francisco|Seattle")) %>%
+  separate(RegionName, into = c("city", "state"), sep = ", ") %>%
+  clean_names() %>% 
+  mutate(metro = case_when(city == "New York" ~ "New York-Newark-Jersey City", 
+                           city == "San Francisco" ~ "San Francisco-Oakland-Hayward", 
+                           city == "Seattle" ~ "Seattle-Tacoma-Bellevue"))
+
+clean_median_income$date <- as.Date(as.yearmon(clean_median_income$date))
+```
+
+
+```{r cache = TRUE}
 all_housing_data <-
   left_join(clean_zhvi, clean_sale_prices, by = c("region_id", "zip_code", "date")) %>% 
   full_join(clean_zri,
@@ -112,7 +130,7 @@ all_housing_data <-
   full_join(clean_rental_prices,
             by = c("zip_code", "city", "state", "metro", "county_name", "date"))
 
-all_housing_data <- all_housing_data %>%
+mean_housing_data <- all_housing_data %>%
   group_by(metro, date) %>%
   summarize(
     mean_zhvi = mean(zhvi, na.rm = TRUE),
@@ -120,21 +138,48 @@ all_housing_data <- all_housing_data %>%
     mean_zri = mean(zri, na.rm = TRUE),
     mean_rental_price = mean(rental_price, na.rm = TRUE)
   ) %>% 
-  pivot_longer(cols = c(mean_zhvi, mean_sale_price, mean_zri, mean_rental_price),
+  full_join(clean_median_income, by = c("metro", "date")) %>% 
+  pivot_longer(cols = c(mean_zhvi, mean_sale_price, mean_zri, mean_rental_price, median_income),
                names_to = "value_type",
                values_to = "mean_value")
-
-median_income <- median_income %>%
-  pivot_longer(cols = contains("-"),
-               names_to = "date",
-               values_to = "median_income") %>%
-  filter(str_detect(RegionName, "New York|San Francisco|Seattle")) %>%
-  separate(RegionName, into = c("city", "state"), sep = ", ") %>%
-  clean_names()
 ```
 
+```{r cache = TRUE}
+income_zhvi <- clean_zhvi %>% 
+  group_by(metro, date) %>% 
+  summarize(mean_zhvi = mean(zhvi, na.rm = TRUE)) %>% 
+  full_join(clean_median_income, by = c("metro", "date")) %>% 
+  select(metro, date, mean_zhvi, median_income) %>% 
+  drop_na()
+
+income_zhvi$metro <- factor(
+  income_zhvi$metro,
+  levels = c("New York-Newark-Jersey City",
+             "San Francisco-Oakland-Hayward",
+             "Seattle-Tacoma-Bellevue"),
+  labels = c("New York Area",
+             "San Francisco Area",
+             "Seattle Area")
+)
+
+graphic <- income_zhvi %>%
+  ggplot(aes(x = median_income, y = mean_zhvi, color = metro)) +
+  geom_point() +
+  scale_x_continuous(labels = scales::dollar) + 
+  scale_y_continuous(labels = scales::dollar) + 
+  labs(title = "Average ZHVI vs. Median Income: {frame_time}",
+       x = "Median Income",
+       y = "Average ZHVI") +
+  transition_time(date)
+```
+
+
 ```{r}
-all_housing_data %>% write_csv(path = "housing-explorations-app/all_housing_data.csv")
+mean_housing_data %>% write_csv(path = "housing-explorations-app/all_housing_data.csv")
 median_income %>% write_csv(path = "housing-explorations-app/median_income.csv")
+
+dir_create("graphics")
+anim_save("graphics/graphic.gif", graphic)
+file_copy("graphics/graphic.gif", "housing-explorations-app/graphic.gif")
 ```
 

@@ -13,16 +13,18 @@ ui <- navbarPage(
              sidebarLayout(sidebarPanel(selectInput(
                "measure",
                "Measure",
-               c(
-                 "Zillow Home Value Index" = "mean_zhvi",
+               c("Zillow Home Value Index" = "mean_zhvi",
                  "Median Sales Price" = "mean_sale_price",
                  "Rental Values" = "mean_zri",
-                 "Rent List Prices" = "mean_rental_price"
+                 "Rent List Prices" = "mean_rental_price",
+                 "Income" = "median_income"
                )
              )),
              mainPanel(plotOutput("line_plot")))
            )),
-  tabPanel("Income and Housing Price Comparisons"),
+  tabPanel("Income and Housing Price Comparisons",
+           titlePanel("Income"),
+           mainPanel(plotOutput("animation"))),
   tabPanel("About", includeMarkdown("about.md"))
 )
 
@@ -32,10 +34,11 @@ server <- function(input, output) {
   
   output$line_plot <- renderPlot({
     type <- case_when(
-      input$measure == "mean_zhvi" ~ "ZHVI",
-      input$measure == "mean_sale_price" ~ "Sale Price",
-      input$measure == "mean_zri" ~ "ZRI",
-      input$measure == "mean_rental_price" ~ "Rental Price",
+      input$measure == "mean_zhvi" ~ "Mean ZHVI",
+      input$measure == "mean_sale_price" ~ "Mean Sale Price",
+      input$measure == "mean_zri" ~ "Mean ZRI",
+      input$measure == "mean_rental_price" ~ "Mean Rental Price",
+      input$measure == "meadian_income" ~ "Median Income"
     )
     
     all_housing_data$metro <- factor(all_housing_data$metro,
@@ -55,11 +58,18 @@ server <- function(input, output) {
                  color = metro)) +
       geom_line() +
       scale_y_continuous(labels = scales::dollar) +
-      labs(title = (paste("Average", type, "By Month")),
+      labs(title = (paste(type, "By Month")),
            x = "Year",
-           y = paste("Mean", type),
+           y = type,
            color = "Region")
   })
+  
+  output$animation <- renderImage({
+    list(src = "graphic.gif",
+         contentType = "image/gif",
+         width = "80%")
+  },
+  deleteFile = FALSE)
 }
 
 # Run the application
