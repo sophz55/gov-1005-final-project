@@ -80,7 +80,6 @@ clean <- function(df, values_to) {
     pivot_longer(cols = contains("-"),
                  names_to = "date",
                  values_to = values_to) %>%
-    drop_na %>%
     clean_names() %>%
     rename(zip_code = region_name) %>%
     select(-size_rank)
@@ -116,7 +115,7 @@ all_housing_data <-
 all_housing_data <- all_housing_data %>%
   group_by(metro, date) %>%
   summarize(
-    mean_zhvi = mean(zhvi),
+    mean_zhvi = mean(zhvi, na.rm = TRUE),
     mean_sale_price = mean(sale_price, na.rm = TRUE),
     mean_zri = mean(zri, na.rm = TRUE),
     mean_rental_price = mean(rental_price, na.rm = TRUE)
