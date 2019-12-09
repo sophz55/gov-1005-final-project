@@ -38,7 +38,7 @@ server <- function(input, output) {
       input$measure == "mean_sale_price" ~ "Mean Sale Price",
       input$measure == "mean_zri" ~ "Mean ZRI",
       input$measure == "mean_rental_price" ~ "Mean Rental Price",
-      input$measure == "meadian_income" ~ "Median Income"
+      input$measure == "median_income" ~ "Median Income"
     )
     
     all_housing_data$metro <- factor(all_housing_data$metro,
@@ -65,7 +65,7 @@ server <- function(input, output) {
   })
   
   output$animation <- renderImage({
-    list(src = "graphic.gif",
+    list(src = "income_graphic.gif",
          contentType = "image/gif",
          width = "80%")
   },

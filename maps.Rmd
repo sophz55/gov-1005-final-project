@@ -1,0 +1,65 @@
+---
+title: "maps"
+author: "Sophia Zheng"
+date: "12/9/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(sf)
+library(janitor)
+library(tidyverse)
+
+zhvi <- read_csv("clean-data/zhvi.csv")
+```
+
+```{r, cache=TRUE}
+dir_create("raw-data")
+
+download.file("https://data.cityofnewyork.us/download/i8iw-xf4u/application%2Fzip",
+              "raw-data/ny_shapefiles.zip")
+unzip("raw-data/ny_shapefiles.zip", exdir = "raw-data")
+
+ny_shape <- st_read("raw-data/ZIP_CODE_040114.shp")
+
+download.file("https://opendata.arcgis.com/datasets/3d5d1db8a1b34b418c331f4ce1fd0fef_2.zip?outSR=%7B%22wkid%22%3A102711%2C%22latestWkid%22%3A3424%7D",
+              "raw-data/nj_shapefiles.zip")
+unzip("raw-data/nj_shapefiles.zip", exdir = "raw-data")
+nj_shape <- st_read("raw-data/New_Jersey_Municipalities.shp")
+
+download.file("https://www2.census.gov/geo/tiger/TIGER2016/TRACT/tl_2016_42_tract.zip",
+              "raw-data/pa_shapefiles.zip")
+unzip("raw-data/pa_shapefiles.zip", exdir = "raw-data")
+pa_shape <- st_read("raw-data/tl_2016_42_tract.shp")
+
+download.file("http://www2.census.gov/geo/tiger/TIGER2015/ZCTA5/tl_2015_us_zcta510.zip",
+              "raw-data/shapefiles.zip")
+unzip("raw-data/shapefiles.zip", exdir = "raw-data")
+shape <- st_read("raw-data/tl_2015_us_zcta510.shp") %>% 
+  clean_names() %>% 
+  rename(zip_code = zcta5ce10) %>% 
+  mutate(zip_code = as.numeric(zip_code))
+dir_delete("raw-data")
+```
+
+
+```{r}
+zhvi_2019 <- zhvi %>%
+  filter(date == "2019-10-01",
+         metro == "New York-Newark-Jersey City") %>% 
+  drop_na()
+
+zhvi_shape <- shape %>%
+  inner_join(zhvi_2019, by = c("zip_code"))
+t <- zhvi_shape %>% 
+  filter(city == "New York")
+ggplot(t)+
+  geom_sf(data = t)
+ggplot()+
+  geom_sf(data = shape)
+
+ggplot(zhvi_shape) +
+  geom_sf(data = zhvi_shape, aes(fill = zhvi))
+```
+
