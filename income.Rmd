@@ -10,7 +10,13 @@ knitr::opts_chunk$set(echo = TRUE)
 library(gganimate)
 library(tidyverse)
 
-zhvi <- read_csv("clean-data/zhvi.csv")
+zhvi <- read_csv("clean-data/zhvi.csv",
+                 col_types = cols(.default = col_double(),
+                                  city = col_character(),
+                                  state = col_character(),
+                                  metro = col_character(),
+                                  date = col_date(format = "%Y-%m-%d")
+                                ))
 ```
 
 ```{r, cache=TRUE}

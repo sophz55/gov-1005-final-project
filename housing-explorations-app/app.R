@@ -2,7 +2,10 @@ library(shiny)
 library(markdown)
 library(tidyverse)
 
-all_housing_data <- read_csv("all_housing_data.csv")
+all_housing_data <- read_csv("all_housing_data.csv",
+                             col_types = cols(.default = col_character(),
+                                              date = col_date(format = "%Y-%m-%d"),
+                                              mean_value = col_double()))
 
 # Define UI for application that draws a histogram
 ui <- navbarPage(

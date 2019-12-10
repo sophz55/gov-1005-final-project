@@ -9,11 +9,21 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 
-zhvi <- read_csv("clean-data/zhvi.csv")
-sale_prices <- read_csv("clean-data/sale_prices.csv")
-zri <- read_csv("clean-data/zri.csv")
-rental_prices <- read_csv("clean-data/rental_prices.csv")
-median_income <- read_csv("clean-data/median_income.csv")
+read_clean <- function(path) {
+  return (read_csv(
+    path,
+    col_types = cols(.default = col_double(),
+                     city = col_character(),
+                     state = col_character(),
+                     metro = col_character(),
+                     date = col_date(format = "%Y-%m-%d"))))
+}
+
+zhvi <- read_clean("clean-data/zhvi.csv")
+sale_prices <- read_clean("clean-data/sale_prices.csv")
+zri <- read_clean("clean-data/zri.csv")
+rental_prices <- read_clean("clean-data/rental_prices.csv")
+median_income <- read_clean("clean-data/median_income.csv")
 ```
 
 ```{r cache=TRUE}

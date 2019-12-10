@@ -79,6 +79,7 @@ clean <- function(df, values_to) {
     pivot_longer(cols = contains("-"),
                  names_to = "date",
                  values_to = values_to) %>%
+    drop_na() %>% 
     clean_names() %>%
     rename(zip_code = region_name) %>%
     select(-size_rank)
@@ -137,4 +138,5 @@ clean_rental_prices %>%
 clean_median_income %>% 
   write_csv(path = "clean-data/median_income.csv")
 ```
+
 
