@@ -12,43 +12,52 @@ library(sf)
 library(janitor)
 library(tigris)
 library(gganimate)
+library(plotly)
+library(rgdal)
 library(tidyverse)
 
-zhvi <- read_csv("clean-data/zhvi.csv")
-```
+zhvi <- read_csv("clean-data/zhvi.csv") %>% 
+  filter(date == "2018-12-01",
+         zip_code != 12853)
 
-```{r, cache=TRUE}
 options(tigris_use_cache = TRUE)
-dir_create("raw-data")
-
-# getting shapefiles with zip codes using the tigris package for only 
-# the regions represented in the zhvi dataset, found by looking at
-# zhvi %>% distinct(zip_code) %>% arrange(zip_code)
-
-nyc_shape <- zctas(starts_with = c("07", "08", "10", "11", "12", "18"), 
-                   class = "sf") %>%
-  clean_names() %>% 
-  mutate(zip_code = as.numeric(zcta5ce10))
-sf_shape <- zctas(starts_with = "94", class = "sf") %>%
-  clean_names() %>% 
-  mutate(zip_code = as.numeric(zcta5ce10))
-sea_shape <- zctas(starts_with = "98", class = "sf") %>%
-  clean_names() %>% 
-  mutate(zip_code = as.numeric(zcta5ce10))
-
-dir_delete("raw-data")
 ```
-
 
 ```{r}
-zhvi_nyc_shape <- nyc_shape %>% 
-  left_join(zhvi, by = c("zip_code"))
+create_interactive_plot <- function(region) {
+  
+  # getting geometries for zip codes using the tigris package for only 
+  # the regions represented in the zhvi dataset, found by looking at
+  # zhvi %>% distinct(zip_code) %>% arrange(zip_code)
+  
+  zips = case_when(region == "nyc" ~ c("07", "08", "10", "11", "12", "18"),
+                   region == "sf" ~ "94",
+                   region == "sea" ~ "98")
+  
+  shape <- zctas(starts_with = zips,
+                 class = "sf") %>% 
+    clean_names() %>%
+    mutate(zip_code = as.numeric(zcta5ce10))
+  
+  zhvi_shape <- shape %>% 
+    left_join(zhvi, by = c("zip_code"))
+  
+  p <- ggplot(zhvi_shape) +
+    geom_sf(data = zhvi_shape, aes(fill = zhvi), lwd = 0) +
+    scale_fill_continuous(trans = "log10")
+  
+  interactive <- ggplotly(p) %>% 
+    highlight(
+      "plotly_hover",
+      selected = attrs_selected(line = list(color = "black"))
+    )
+  
+  interactive %>%
+    htmlwidgets::saveWidget(file = paste0("~/Desktop/Gov\ 1005/housing-price-explorations/housing-explorations-app/", region, "_interactive.html"), selfcontained = TRUE)
+}
 
-zhvi_nyc_shape <- zhvi_nyc_shape %>% 
-  drop_na(date)
-
-ggplot(zhvi_nyc_shape) +
-  geom_sf(data = zhvi_nyc_shape, aes(fill = zhvi)) +
-  transition_time(date)
+create_interactive_plot("nyc")
+create_interactive_plot("sf")
+create_interactive_plot("sea")
 ```
 

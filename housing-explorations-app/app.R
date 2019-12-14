@@ -28,6 +28,8 @@ ui <- navbarPage(
   tabPanel("Income and Housing Price Comparisons",
            titlePanel("Income"),
            mainPanel(plotOutput("animation"))),
+  tabPanel("House Value Maps by Zip Code",
+           mainPanel(htmlOutput("test"))),
   tabPanel("About", includeMarkdown("about.md"))
 )
 
@@ -73,6 +75,12 @@ server <- function(input, output) {
          width = "80%")
   },
   deleteFile = FALSE)
+  
+  output$test <- renderUI({
+    includeHTML("nyc_interactive.html")
+    includeHTML("sf_interactive.html")
+    includeHTML("sea_interactive.html")
+  })
 }
 
 # Run the application
