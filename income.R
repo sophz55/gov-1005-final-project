@@ -1,3 +1,5 @@
+# This file creates a graphic comparing income with average house value over time
+
 income_zhvi <- zhvi %>% 
   group_by(metro, date) %>% 
   summarize(mean_zhvi = mean(zhvi, na.rm = TRUE)) %>% 
@@ -25,8 +27,4 @@ graphic <- income_zhvi %>%
        y = "Average ZHVI") +
   transition_time(date)
 
-dir_create("graphics")
-anim_save("graphics/income_graphic.gif", graphic)
-file_copy("graphics/income_graphic.gif", 
-          new_path = "housing-explorations-app/income_graphic.gif", 
-          overwrite = TRUE)
+anim_save("housing-explorations-app/income_graphic.gif", graphic)

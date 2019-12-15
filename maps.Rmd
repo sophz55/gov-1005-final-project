@@ -4,27 +4,29 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
-library(fs)
 library(sf)
 library(janitor)
 library(tigris)
 library(tmap)
+library(grid)
 library(tidyverse)
 
-zhvi <- read_csv("clean-data/zhvi.csv",
-                 col_types = cols(.default = col_character(),
-                                  region_id = col_double(),
-                                  zip_code = col_double(),
-                                  zhvi = col_double())) %>%
+prices <- read_csv("clean-data/all_housing_data.csv",
+                   col_types = cols(.default = col_double(),
+                                    city = col_character(),
+                                    state = col_character(),
+                                    metro = col_character(),
+                                    county_name = col_character(),
+                                    date = col_character())) %>%
   filter(date %in% c("1999-10-01", "2009-10-01", "2019-10-01"))
 
 options(tigris_use_cache = TRUE)
 ```
 
-```{r}
+```{r, cache = TRUE, include = FALSE}
 # getting geometries for zip codes using the tigris package for only 
 # the regions represented in the zhvi dataset, found by looking at
-# zhvi %>% distinct(zip_code) %>% arrange(zip_code)
+# prices %>% distinct(zip_code) %>% arrange(zip_code)
 
 zips = c("07", 
          "08", 
@@ -48,23 +50,36 @@ shape <- zctas(starts_with = zips,
                                "San Francisco-Oakland-Hayward",
                                "Seattle-Tacoma-Bellevue")))
 
-zhvi_shape <- shape %>% 
-  left_join(zhvi, by = c("zip_code", "metro"))
+prices_shape <- shape %>% 
+  left_join(prices, by = c("zip_code", "metro"))
 
 tmap_mode("view")
 tmap_options(limits = c(facets.view = 9))
 
-interactive <- tm_shape(zhvi_shape) +
+interactive <- tm_shape(prices_shape) +
   tm_polygons("zhvi", 
               style = "log10", 
-              palette = "Blues", 
-              popup.vars = c("ZHVI" = "zhvi", "City" = "city"),
-              legend.format = list(format = "f", 
-                                   big.mark = ",", 
-                                   scientific = TRUE)) +
-  tm_facets(by = c("date", "metro"), ncol = 3) +
-  tm_layout(legend.only = TRUE)
+              palette = "RdPu", 
+              contrast = c(0.2,1),
+              lwd = 0,
+              popup.vars = c("ZHVI" = "zhvi",
+                             "List Price/Sq Ft" = "sale_list_prices_sqft", 
+                             "City" = "city"),
+              legend.show = FALSE) +
+  tm_facets(by = c("date", "metro"), 
+            ncol = 3, 
+            free.scales = FALSE, 
+            drop.empty.facets = TRUE, 
+            drop.NA.facets = TRUE) +
+  tm_layout(title = c("NYC Metro Area 1999", "SF Metro Area 1999", "Seattle Area 1999",
+                      "NYC Metro Area 2009", "SF Metro Area 2009", "Seattle Area 2009",
+                      "NYC Metro Area 2019", "SF Metro Area 2019", "Seattle Area 2019")) 
 
-interactive
+legend <- knitr::include_graphics("maps_legend.png")
 ```
 
+```{r}
+par(mfrow=c(1,2))
+interactive
+legend
+```
