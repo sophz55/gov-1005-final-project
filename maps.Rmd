@@ -1,63 +1,70 @@
 ---
-title: "maps"
-author: "Sophia Zheng"
-date: "12/9/2019"
 output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE)
 library(fs)
 library(sf)
 library(janitor)
 library(tigris)
-library(gganimate)
-library(plotly)
-library(rgdal)
+library(tmap)
 library(tidyverse)
 
-zhvi <- read_csv("clean-data/zhvi.csv") %>% 
-  filter(date == "2018-12-01",
-         zip_code != 12853)
+zhvi <- read_csv("clean-data/zhvi.csv",
+                 col_types = cols(.default = col_character(),
+                                  region_id = col_double(),
+                                  zip_code = col_double(),
+                                  zhvi = col_double())) %>%
+  filter(date %in% c("1999-10-01", "2009-10-01", "2019-10-01"))
 
 options(tigris_use_cache = TRUE)
 ```
 
 ```{r}
-create_interactive_plot <- function(region) {
-  
-  # getting geometries for zip codes using the tigris package for only 
-  # the regions represented in the zhvi dataset, found by looking at
-  # zhvi %>% distinct(zip_code) %>% arrange(zip_code)
-  
-  zips = case_when(region == "nyc" ~ c("07", "08", "10", "11", "12", "18"),
-                   region == "sf" ~ "94",
-                   region == "sea" ~ "98")
-  
-  shape <- zctas(starts_with = zips,
-                 class = "sf") %>% 
-    clean_names() %>%
-    mutate(zip_code = as.numeric(zcta5ce10))
-  
-  zhvi_shape <- shape %>% 
-    left_join(zhvi, by = c("zip_code"))
-  
-  p <- ggplot(zhvi_shape) +
-    geom_sf(data = zhvi_shape, aes(fill = zhvi), lwd = 0) +
-    scale_fill_continuous(trans = "log10")
-  
-  interactive <- ggplotly(p) %>% 
-    highlight(
-      "plotly_hover",
-      selected = attrs_selected(line = list(color = "black"))
-    )
-  
-  interactive %>%
-    htmlwidgets::saveWidget(file = paste0("~/Desktop/Gov\ 1005/housing-price-explorations/housing-explorations-app/", region, "_interactive.html"), selfcontained = TRUE)
-}
+# getting geometries for zip codes using the tigris package for only 
+# the regions represented in the zhvi dataset, found by looking at
+# zhvi %>% distinct(zip_code) %>% arrange(zip_code)
 
-create_interactive_plot("nyc")
-create_interactive_plot("sf")
-create_interactive_plot("sea")
+zips = c("07", 
+         "08", 
+         "10", 
+         "11", 
+         "124", 
+         "125", 
+         "127", 
+         "183", 
+         "184", 
+         "94", 
+         "98")
+
+shape <- zctas(starts_with = zips,
+               class = "sf") %>% 
+  clean_names() %>%
+  mutate(zip_code = as.numeric(zcta5ce10)) %>% 
+  mutate(metro = ifelse(zip_code < 94000, 
+                        "New York-Newark-Jersey City",
+                        ifelse(zip_code < 98000,
+                               "San Francisco-Oakland-Hayward",
+                               "Seattle-Tacoma-Bellevue")))
+
+zhvi_shape <- shape %>% 
+  left_join(zhvi, by = c("zip_code", "metro"))
+
+tmap_mode("view")
+tmap_options(limits = c(facets.view = 9))
+
+interactive <- tm_shape(zhvi_shape) +
+  tm_polygons("zhvi", 
+              style = "log10", 
+              palette = "Blues", 
+              popup.vars = c("ZHVI" = "zhvi", "City" = "city"),
+              legend.format = list(format = "f", 
+                                   big.mark = ",", 
+                                   scientific = TRUE)) +
+  tm_facets(by = c("date", "metro"), ncol = 3) +
+  tm_layout(legend.only = TRUE)
+
+interactive
 ```
 

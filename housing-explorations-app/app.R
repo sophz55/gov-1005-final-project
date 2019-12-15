@@ -81,6 +81,10 @@ server <- function(input, output) {
     includeHTML("sf_interactive.html")
     includeHTML("sea_interactive.html")
   })
+  output$tmap <- renderLeaflet({
+    tm <- tm_shape(World) + tm_polygons("HPI", legend.title = "Happy Planet Index")
+    tmap_leaflet(tm)
+  })
 }
 
 # Run the application
