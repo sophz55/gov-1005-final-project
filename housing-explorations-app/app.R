@@ -1,6 +1,7 @@
 library(shiny)
 library(markdown)
 library(tidyverse)
+library(shinythemes)
 
 mean_housing_data <- read_csv("mean_housing_data.csv",
                              col_types = cols(.default = col_character(),
@@ -9,6 +10,7 @@ mean_housing_data <- read_csv("mean_housing_data.csv",
 
 # Define UI for application that draws a histogram
 ui <- navbarPage(
+  theme = shinytheme("flatly"),
   "Housing Explorations in US Areas of Interest",
   tabPanel("Explore",
            fluidPage(
