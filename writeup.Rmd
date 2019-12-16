@@ -1,0 +1,20 @@
+---
+title: "Visualizing and Comparing Housing Values in Major Metropolitan Cities"
+author: "Sophia Zheng"
+date: "12/15/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+#### Motivation
+As 
+
+#### Methodology 
+
+#### Discussion
+
+#### Areas of Further Exploration

@@ -80,7 +80,8 @@ interactive <- tm_shape(prices_shape) +
 # multiple facets, so I have utilized this workaround so that the legend will not distract
 # from the maps
 
-legend <- knitr::include_graphics("maps_legend.png")
+legend <- knitr::include_graphics("graphics/maps_legend.png")
+tmap_save(interactive, "graphics/static_maps.png")
 ```
 
 ```{r}
