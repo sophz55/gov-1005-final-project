@@ -75,6 +75,11 @@ interactive <- tm_shape(prices_shape) +
                       "NYC Metro Area 2009", "SF Metro Area 2009", "Seattle Area 2009",
                       "NYC Metro Area 2019", "SF Metro Area 2019", "Seattle Area 2019")) 
 
+# This legend is a screenshot of the legend produced by the interactive map.
+# However, the tmap package does not have a way to display only one legend when there are
+# multiple facets, so I have utilized this workaround so that the legend will not distract
+# from the maps
+
 legend <- knitr::include_graphics("maps_legend.png")
 ```
 
