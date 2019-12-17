@@ -16,3 +16,6 @@ render(input = "maps.Rmd",
        output_format = "html_document", 
        output_dir = "housing-explorations-app",
        output_file = "interactive_maps.html")
+
+dir_create("housing-explorations-app/www")
+file_copy("writeup.pdf", "housing-explorations-app/www", overwrite = TRUE)
