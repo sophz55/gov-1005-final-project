@@ -1,5 +1,6 @@
 library(shiny)
 library(markdown)
+library(vembedr)
 library(tidyverse)
 library(shinythemes)
 
@@ -29,7 +30,7 @@ ui <- navbarPage(
              )),
              mainPanel(plotOutput("line_plot")))
            )),
-  tabPanel("Income and Housing Price Comparisons",
+  tabPanel("Income and Housing Value Comparisons",
            titlePanel("Income"),
            mainPanel(plotOutput("animation"))),
   tabPanel("House Value Maps by Zip Code",
@@ -45,7 +46,11 @@ ui <- navbarPage(
                )
              ),
              htmlOutput("interactive_maps"))),
-  tabPanel("About", includeMarkdown("about.md"))
+  tabPanel("About", 
+           includeMarkdown("about.md"),
+           br(),
+           fluidRow(embed_url("https://www.youtube.com/watch?v=TCF28bgRxxk"),
+                    align = "center"))
 )
 
 

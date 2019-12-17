@@ -146,7 +146,7 @@ mean_housing_data <- all_housing_data %>%
                         mean_rent_list_price_sqft,
                         median_income),
                names_to = "value_type",
-               values_to = "mean_value")
+               values_to = "mean_value") %>% 
+  drop_na(mean_value)
 
-mean_housing_data %>% 
   write_csv(path = "housing-explorations-app/mean_housing_data.csv")
